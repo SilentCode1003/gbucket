@@ -45,7 +45,6 @@
     "express-rate-limit": "^8.0.0",
     "express-session": "^1.18.2",
     "express-winston": "^4.2.0",
-    "file-type": "^22.1.1",
     "http-errors": "~1.6.3",
     "joi": "^18.0.1",
     "js-yaml": "^4.1.1",

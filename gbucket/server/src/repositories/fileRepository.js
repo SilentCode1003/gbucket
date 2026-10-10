@@ -43,7 +43,7 @@ class FileRepository extends BaseRepository {
       // 4. Save the file metadata to the database using your base create method
       const dbRecord = await this.create({
         f_path: `/uploads/${fileName}`, // Store the relative URL path in DB
-        f_url: `${urlPath}/uploads/${fileName}`,
+        f_url: `${urlPath}/uploads/${metadata.f_web_service}/${metadata.f_path}/${fileName}`, // Store the full URL path in DB
         f_web_service: metadata.f_web_service,
         f_file_type: metadata.f_file_type,
         f_path: metadata.f_path,

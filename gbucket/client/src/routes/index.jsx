@@ -48,7 +48,6 @@ function RouteComponent() {
     submissionData.append('f_web_service', formData.f_web_service)
     submissionData.append('f_file_type', formData.f_file_type)
     submissionData.append('f_path', formData.f_path)
-    submissionData.append('f_url', formData.f_url)
 
     try {
       setStatus('Uploading image...')
@@ -63,7 +62,6 @@ function RouteComponent() {
       setFormData({
         f_file_type: '',
         f_path: '',
-        f_url: '',
         f_web_service: '',
       })
     } catch (err) {
@@ -81,7 +79,7 @@ function RouteComponent() {
         <h2 style={styles.heading}>Upload Image to Public Storage</h2>
         <form onSubmit={handleUpload}>
           <div style={styles.fieldGroup}>
-            <label style={styles.label}>Web Service (f_web_service):</label>
+            <label style={styles.label}>Web Service:</label>
             <input
               type="text"
               value={formData.f_web_service}
@@ -92,7 +90,7 @@ function RouteComponent() {
           </div>
 
           <div style={styles.fieldGroup}>
-            <label style={styles.label}>File Type (f_file_type):</label>
+            <label style={styles.label}>File Type:</label>
             <input
               type="text"
               value={formData.f_file_type}
@@ -103,24 +101,13 @@ function RouteComponent() {
           </div>
 
           <div style={styles.fieldGroup}>
-            <label style={styles.label}>File Path (f_path):</label>
+            <label style={styles.label}>Target File Path:</label>
             <input
               type="text"
               value={formData.f_path}
               onChange={(e) => setFormData({ ...formData, f_path: e.target.value })}
               style={styles.input}
               placeholder="e.g. /uploads/filename.ext"
-            />
-          </div>
-
-          <div style={styles.fieldGroup}>
-            <label style={styles.label}>File URL (f_url):</label>
-            <input
-              type="text"
-              value={formData.f_url}
-              onChange={(e) => setFormData({ ...formData, f_url: e.target.value })}
-              style={styles.input}
-              placeholder="e.g. https://domain.com/uploads/..."
             />
           </div>
 

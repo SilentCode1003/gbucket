@@ -144,3 +144,6 @@ server/src/utilities/swagger-temp-loader.util.js
 
 # Ignore generated files
 client/src/routeTree.gen.ts
+
+#public uploads folder
+server/public/uploads

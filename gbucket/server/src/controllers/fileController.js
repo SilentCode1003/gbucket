@@ -1,34 +1,90 @@
 const fileRepository = require('../repositories/fileRepository');
 const { logger } = require('../utilities/logger.util');
 const fs = require('fs').promises;
+const { fileTypeFromBuffer } = require('file-type');
+const path = require('path');
+const { randomUUID } = require('crypto');
 
 exports.createFile = async (req, res) => {
   try {
     const uploadedFile = req.file;
+    const { file: base64String, fileName, ...otherBody } = req.body;
 
-    if (!uploadedFile) {
-      return res.status(400).json({ error: 'No image file uploaded' });
+    let fileBuffer;
+    let originalName;
+    const uniqueId = randomUUID(); // Standard UUID v4 generation
+
+    // Case 1: Multer uploaded file
+    if (uploadedFile) {
+      logger.info(`Received file upload: ${uploadedFile.originalname}, size: ${uploadedFile.size} bytes`);
+      fileBuffer = await fs.readFile(uploadedFile.path);
+
+      // Extract original extension or fallback to empty string
+      const fileExt = path.extname(uploadedFile.originalname);
+      originalName = `${uniqueId}${fileExt}`;
+
+      // Clean up the temp file created by Multer
+      await fs.unlink(uploadedFile.path);
+    }
+    // Case 2: Base64 string sent in body
+    else if (base64String) {
+      logger.info(`Received base64 upload for file: ${fileName || 'unnamed_file'}`);
+
+      let detectedExt = null;
+
+      // Method A: Check for Data URL prefix (e.g., "data:image/png;base64,...")
+      if (base64String.includes(',')) {
+        const matches = base64String.match(/^data:([a-zA-Z0-9-]+\/[a-zA-Z0-9-+.]+);base64,/);
+        if (matches && matches[1]) {
+          const mimeType = matches[1];
+          detectedExt = mimeType.split('/')[1]?.split('+')[0];
+        }
+      }
+
+      // Extract raw base64 data payload
+      const base64Data = base64String.includes(',')
+        ? base64String.split(',')[1]
+        : base64String;
+
+      // Convert Base64 string to Buffer
+      fileBuffer = Buffer.from(base64Data, 'base64');
+
+      // Method B: Fallback to magic numbers inspection if Data URL didn't specify extension
+      if (!detectedExt) {
+        const fileTypeResult = await fileTypeFromBuffer(fileBuffer);
+        if (fileTypeResult) {
+          detectedExt = fileTypeResult.ext;
+        }
+      }
+
+      // Method C: If fileName was manually provided with an extension, extract that as a fallback
+      if (!detectedExt && fileName && path.extname(fileName)) {
+        detectedExt = path.extname(fileName).replace('.', '');
+      }
+
+      // Build originalName with UUID + extension
+      originalName = detectedExt
+        ? `${uniqueId}.${detectedExt}`
+        : uniqueId;
+    }
+    // Neither was provided
+    else {
+      return res.status(400).json({ error: 'No file or base64 data uploaded' });
     }
 
-    // 3. Read the file into a buffer
-    const fileBuffer = await fs.readFile(uploadedFile.path);
-
-    // 4. Pass EVERYTHING to your repository method
+    // Pass Buffer and metadata to repository
     const result = await fileRepository.createWithPublicFile(
-      uploadedFile.originalname,
+      originalName,
       fileBuffer,
-      req.body
+      uploadedFile ? req.body : otherBody
     );
 
-    // 5. Clean up the temp file created by Multer
-    await fs.unlink(uploadedFile.path);
-
-    // 6. Send success response back to TanStack router
-    res.status(201).json(result);
+    // Send success response
+    return res.status(201).json(result);
 
   } catch (error) {
-    console.error("Upload error:", error);
-    res.status(500).json({ error: error.message });
+    logger.error("Upload error:", error);
+    return res.status(500).json({ error: error.message });
   }
 };
 

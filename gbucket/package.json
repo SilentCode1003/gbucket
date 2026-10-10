@@ -34,6 +34,7 @@
     "dotenv-cli": "^7.3.0"
   },
   "dependencies": {
+    "crypto": "^1.0.1",
     "lucide-react": "^1.28.0",
     "multer": "^2.2.0"
   }

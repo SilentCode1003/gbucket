@@ -29,7 +29,7 @@ class FileRepository extends BaseRepository {
   async createWithPublicFile(fileName, fileBuffer, metadata = {}) {
     try {
       // 1. Define the public folder path (adjust relative path as needed based on your project structure)
-      const publicDir = path.join(__dirname, '../../public/uploads');
+      const publicDir = path.join(__dirname, `../../public/uploads/${metadata.f_web_service}/${metadata.f_path}`);
 
       // Ensure the directory exists
       await fs.mkdir(publicDir, { recursive: true });

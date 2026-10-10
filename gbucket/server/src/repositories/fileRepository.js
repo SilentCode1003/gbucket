@@ -51,7 +51,7 @@ class FileRepository extends BaseRepository {
 
       return {
         message: 'success', data: {
-          url: `${urlPath}/uploads/${fileName}`,
+          url: `${urlPath}/uploads/${metadata.f_web_service}/${metadata.f_path}/${fileName}`,
         }
       };
     } catch (error) {
